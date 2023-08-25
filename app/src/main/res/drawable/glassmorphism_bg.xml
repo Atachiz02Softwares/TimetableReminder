@@ -1,0 +1,9 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#2CFF0000" /> <!-- Adjust alpha and color -->
+            <corners android:radius="8dp" /> <!-- Adjust corner radius as needed -->
+        </shape>
+    </item>
+<!--    <item android:drawable="@drawable/icon" /> &lt;!&ndash; Your background image &ndash;&gt;-->
+</layer-list>
