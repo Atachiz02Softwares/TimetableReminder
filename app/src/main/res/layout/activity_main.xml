@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/glassmorphism_bg">
+    android:layout_height="match_parent">
 
-    <!--    <com.chrisvin.library.FrostedGlassPane-->
-    <!--        android:id="@+id/frostedGlassPane"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        app:fgp_radius="10dp"-->
-    <!--        app:fgp_alpha="0.8" />-->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/icon" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/glassmorphism_bg" />
 
     <!-- Add your UI elements here -->
 
-    <!--    <com.eightbitlab.supportrenderscriptblur.SupportRenderScriptBlur-->
-    <!--        android:id="@+id/blurView"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        app:blur_radius="10"-->
-    <!--        app:downscale_factor="8"-->
-    <!--        app:overlay_color="#80000000" />-->
-
-</RelativeLayout>
+</FrameLayout>

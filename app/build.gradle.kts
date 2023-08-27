@@ -39,6 +39,8 @@ dependencies {
 
     implementation("com.eightbitlab:blurview:1.6.6")
     implementation("com.github.Chrisvin:FrostedGlassPane:1.0")
+    implementation("io.alterac.blurkit:blurkit:1.1.0")
+    implementation("com.github.fornewid:neumorphism:0.2.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
