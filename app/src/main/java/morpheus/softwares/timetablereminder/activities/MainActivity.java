@@ -81,8 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
             datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                     calendar.get(Calendar.DAY_OF_MONTH), (view1, year, monthOfYear, dayOfMonth) ->
-                            date[0] =
-                                    dayOfMonth + "-" + year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
+                            date[0] = year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
 
             timePicker.setOnTimeChangedListener((view12, hourOfDay, minute) -> time[0] = hourOfDay + ":" + minute);
 
