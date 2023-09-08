@@ -13,6 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 import morpheus.softwares.timetablereminder.R;
+import morpheus.softwares.timetablereminder.fragments.Courses;
+import morpheus.softwares.timetablereminder.fragments.Home;
+import morpheus.softwares.timetablereminder.fragments.Profile;
 import morpheus.softwares.timetablereminder.models.Database;
 import morpheus.softwares.timetablereminder.models.User;
 
@@ -57,8 +60,13 @@ public class SignupActivity extends AppCompatActivity {
                             "instead...", Toast.LENGTH_SHORT).show();
                     break;
                 } else {
-                    startActivity(new Intent(SignupActivity.this, MainActivity.class)
-                            .putExtra("username", username));
+                    Bundle bundle = new Bundle();
+                    bundle.putString("username", username);
+                    new Profile().setArguments(bundle);
+                    new Home().setArguments(bundle);
+                    new Courses().setArguments(bundle);
+
+                    startActivity(new Intent(SignupActivity.this, MainActivity.class));
                     break;
                 }
             }

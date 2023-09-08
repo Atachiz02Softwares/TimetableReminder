@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         toolbar = findViewById(R.id.toolbar);
-        floatingActionButton = findViewById(R.id.fabAddButton);
+        floatingActionButton = findViewById(R.id.fabAddCourse);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         calendar = Calendar.getInstance();
@@ -85,8 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
             timePicker.setOnTimeChangedListener((view12, hourOfDay, minute) -> time[0] = hourOfDay + ":" + minute);
 
-            add.setOnClickListener(v1 -> database.insertCourse(
-                    new Course(0, courseCode, courseTitle, date[0], time[0])));
+            add.setOnClickListener(v1 -> database.insertCourse(new Course(0, courseCode, courseTitle, date[0], time[0])));
 
             builder.setView(view);
 

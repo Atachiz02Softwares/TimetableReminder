@@ -12,6 +12,7 @@
         android:layout_height="100dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
+        android:contentDescription="@string/icon"
         android:src="@drawable/icon" />
 
     <TextView
@@ -21,7 +22,7 @@
         android:layout_below="@id/icon"
         android:layout_centerInParent="true"
         android:layout_marginTop="30dp"
-        android:text="Timetable Reminder"
+        android:text="@string/app_name"
         android:textSize="30sp"
         android:textStyle="bold" />
 
@@ -34,7 +35,9 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
-        android:hint="Username"
+        android:autofillHints="username"
+        android:hint="@string/username"
+        android:inputType="text"
         android:padding="15dp"
         android:textSize="16sp" />
 
@@ -47,7 +50,9 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
-        android:hint="Password"
+        android:autofillHints="password"
+        android:hint="@string/password"
+        android:inputType="textPassword"
         android:padding="15dp"
         android:textSize="16sp" />
 
@@ -60,7 +65,9 @@
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
-        android:hint="Username"
+        android:autofillHints="password"
+        android:hint="@string/confirm_password"
+        android:inputType="textPassword"
         android:padding="15dp"
         android:textSize="16sp" />
 
@@ -71,7 +78,7 @@
         android:layout_below="@id/confirmPassword"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
-        android:text="Sign Up"
+        android:text="@string/sign_up"
         android:textSize="20sp" />
 
     <TextView
@@ -81,7 +88,7 @@
         android:layout_below="@+id/signup"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
-        android:text="Or click here to sign in..."
+        android:text="@string/click_to_signin"
         android:textSize="18sp"
         android:textStyle="italic" />
 
@@ -90,7 +97,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerInParent="true"
-        android:text="Atachiz02 Softwares"
+        android:text="@string/title"
         android:textSize="14sp"
         android:textStyle="italic" />
 

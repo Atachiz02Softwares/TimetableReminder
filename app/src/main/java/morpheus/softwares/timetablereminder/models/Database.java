@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class Database extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "timetable.db",
-            TABLE_USERS = "users", TABLE_COURSES = "courses";
+            TABLE_USERS = "users", TABLE_COURSES = "courses", TABLE_PROFILE = "profile";
     public static final int DATABASE_VERSION = 1;
 
     public Database(@Nullable Context context) {
@@ -25,12 +25,15 @@ public class Database extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE users (id integer PRIMARY KEY AUTOINCREMENT, username text, password text)");
         db.execSQL("CREATE TABLE supervisors (id integer PRIMARY KEY AUTOINCREMENT, course_code " +
                 "text, course_title text, date text, time text)");
+        db.execSQL("CREATE TABLE profile (id integer PRIMARY KEY AUTOINCREMENT, username text, id_number text, " +
+                "email text, name text, level text, department text)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_COURSES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROFILE);
         onCreate(db);
     }
 
@@ -47,6 +50,16 @@ public class Database extends SQLiteOpenHelper {
         String sqlInsert = "INSERT INTO " + TABLE_COURSES;
         sqlInsert += " values( null, '" + course.getCourseCode() + "', '" + course.getCourseTitle() +
                 "', '" + course.getDate() + "', '" + course.getTime() + "' )";
+        db.execSQL(sqlInsert);
+        db.close();
+    }
+
+    public void insertUserProfile(UserProfile userProfile) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sqlInsert = "INSERT INTO " + TABLE_PROFILE;
+        sqlInsert += " values( null, '" + userProfile.getUsername() + "', '" + userProfile.getIdNumber() +
+                "', '" + userProfile.getEmail() + "', '" + userProfile.getName() + "', '" +
+                userProfile.getLevel() + "', '" + userProfile.getDepartment() + "' )";
         db.execSQL(sqlInsert);
         db.close();
     }
@@ -88,6 +101,25 @@ public class Database extends SQLiteOpenHelper {
         return courses;
     }
 
+    public ArrayList<UserProfile> selectAllUserProfiles() {
+        String sqlQuery = "SELECT * FROM " + TABLE_PROFILE;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        @SuppressLint("Recycle")
+        Cursor cursor = db.rawQuery(sqlQuery, null);
+
+        ArrayList<UserProfile> userProfiles = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            UserProfile userProfile = new UserProfile(cursor.getInt(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getString(3), cursor.getString(4),
+                    cursor.getString(5), cursor.getString(6));
+            userProfiles.add(userProfile);
+        }
+
+        db.close();
+        return userProfiles;
+    }
+
     public void deleteUser(String email) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_USERS, "email=?", new String[]{email});
@@ -97,6 +129,12 @@ public class Database extends SQLiteOpenHelper {
     public void deleteCourse(String courseCode) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_COURSES, "course_code=?", new String[]{courseCode});
+        db.close();
+    }
+
+    public void deleteUserProfile(String username) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_PROFILE, "course_code=?", new String[]{username});
         db.close();
     }
 

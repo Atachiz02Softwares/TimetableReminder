@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#809C27B0">
+    android:layout_height="match_parent"
+    android:background="@color/transparent">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="20dp"
-            android:text="Add to Timetable"
+            android:text="@string/add_to_timetable"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -25,7 +25,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/ic"
             android:layout_marginBottom="10dp"
-            android:hint="Course Code"
+            android:autofillHints="username"
+            android:hint="@string/course_code"
+            android:inputType="text"
             android:maxLines="1"
             android:padding="15dp" />
 
@@ -35,7 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/courseCode"
             android:layout_marginBottom="10dp"
-            android:hint="Course Title"
+            android:autofillHints="username"
+            android:hint="@string/course_title"
             android:inputType="textMultiLine"
             android:padding="15dp" />
 
@@ -63,7 +66,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/timePicker"
             android:layout_centerHorizontal="true"
-            android:text="Add" />
+            android:text="@string/add" />
     </RelativeLayout>
 
 </androidx.core.widget.NestedScrollView>
