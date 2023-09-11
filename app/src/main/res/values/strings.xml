@@ -18,4 +18,6 @@
     <string name="department">Department</string>
     <string name="level">Level</string>
     <string name="add_profile">Add Profile</string>
+    <string name="online">online</string>
+    <string name="offline">offline</string>
 </resources>

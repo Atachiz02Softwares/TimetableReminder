@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,7 +29,6 @@ public class Profile extends Fragment {
     MaterialAlertDialogBuilder builder;
 
     public Profile() {
-        database = new Database(getContext());
     }
 
     @Nullable
@@ -36,24 +36,25 @@ public class Profile extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.profile, container, false);
 
+        database = new Database(getContext());
+
         TextView idNumber = view.findViewById(R.id.idNumber), studentName = view.findViewById(R.id.name),
                 email = view.findViewById(R.id.email), lvl = view.findViewById(R.id.level),
                 dept = view.findViewById(R.id.department);
         FloatingActionButton floatingActionButton = view.findViewById(R.id.fabAddProfile);
 
-        assert getArguments() != null;
-        String username = getArguments().getString("username");
+//        String username = getArguments().getString("username");
 
         ArrayList<UserProfile> userProfiles = database.selectAllUserProfiles();
         for (UserProfile userProfile : userProfiles) {
-            if (userProfile.getUsername().equals(username)) {
-                idNumber.setText(userProfile.getIdNumber());
-                studentName.setText(userProfile.getName());
-                email.setText(userProfile.getName());
-                lvl.setText(userProfile.getLevel());
-                dept.setText(userProfile.getDepartment());
-                break;
-            }
+//            if (userProfile.getUsername().equals(username)) {
+            idNumber.setText(userProfile.getIdNumber());
+            studentName.setText(userProfile.getName());
+            email.setText(userProfile.getName());
+            lvl.setText(userProfile.getLevel());
+            dept.setText(userProfile.getDepartment());
+//                break;
+//            }
         }
 
         floatingActionButton.setOnClickListener(v -> {
@@ -70,8 +71,9 @@ public class Profile extends Fragment {
                     department = String.valueOf(addDepartment.getText());
 
             add.setOnClickListener(v1 -> {
-                database.insertUserProfile(new UserProfile(0, username, id, mail, name, level, department));
+                database.insertUserProfile(new UserProfile(0, "username", id, mail, name, level, department));
                 alertDialog.dismiss();
+                Toast.makeText(getContext(), "User profile created", Toast.LENGTH_SHORT).show();
             });
 
             builder.setView(dialogView);

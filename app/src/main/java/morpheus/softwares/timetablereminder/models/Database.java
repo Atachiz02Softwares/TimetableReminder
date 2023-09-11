@@ -22,8 +22,9 @@ public class Database extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE users (id integer PRIMARY KEY AUTOINCREMENT, username text, password text)");
-        db.execSQL("CREATE TABLE supervisors (id integer PRIMARY KEY AUTOINCREMENT, course_code " +
+        db.execSQL("CREATE TABLE users (id integer PRIMARY KEY AUTOINCREMENT, username text, " +
+                "password text, status text)");
+        db.execSQL("CREATE TABLE courses (id integer PRIMARY KEY AUTOINCREMENT, course_code " +
                 "text, course_title text, date text, time text)");
         db.execSQL("CREATE TABLE profile (id integer PRIMARY KEY AUTOINCREMENT, username text, id_number text, " +
                 "email text, name text, level text, department text)");
@@ -40,7 +41,8 @@ public class Database extends SQLiteOpenHelper {
     public void insertUser(User user) {
         SQLiteDatabase db = this.getWritableDatabase();
         String sqlInsert = "INSERT INTO " + TABLE_USERS;
-        sqlInsert += " values( null, '" + user.getUsername() + "', '" + user.getPassword() + "' )";
+        sqlInsert += " values( null, '" + user.getUsername() + "', '" + user.getPassword() + "', " +
+                "'" + user.getStatus() + "' )";
         db.execSQL(sqlInsert);
         db.close();
     }
@@ -74,7 +76,7 @@ public class Database extends SQLiteOpenHelper {
         ArrayList<User> users = new ArrayList<>();
         while (cursor.moveToNext()) {
             User currentUser = new User(cursor.getInt(0), cursor.getString(1),
-                    cursor.getString(2));
+                    cursor.getString(2), cursor.getString(3));
             users.add(currentUser);
         }
 
@@ -143,7 +145,15 @@ public class Database extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("date", newDate);
         values.put("time", newTime);
-        db.update(TABLE_USERS, values, "course_code=?", new String[]{courseCode});
+        db.update(TABLE_COURSES, values, "course_code=?", new String[]{courseCode});
+        db.close();
+    }
+
+    public void updateStatus(String username, String newStatus) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("status", newStatus);
+        db.update(TABLE_USERS, values, "username=?", new String[]{username});
         db.close();
     }
 }

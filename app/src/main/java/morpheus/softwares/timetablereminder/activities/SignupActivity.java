@@ -17,6 +17,7 @@ import morpheus.softwares.timetablereminder.fragments.Courses;
 import morpheus.softwares.timetablereminder.fragments.Home;
 import morpheus.softwares.timetablereminder.fragments.Profile;
 import morpheus.softwares.timetablereminder.models.Database;
+import morpheus.softwares.timetablereminder.models.Link;
 import morpheus.softwares.timetablereminder.models.User;
 
 public class SignupActivity extends AppCompatActivity {
@@ -41,34 +42,44 @@ public class SignupActivity extends AppCompatActivity {
         database = new Database(this);
         users = database.selectAllUsers();
 
+        for (User user : users) {
+            if (user.getStatus().equals(getString(R.string.online))) {
+                Bundle bundle = new Bundle();
+                bundle.putString("username", user.getUsername());
+                new Profile().setArguments(bundle);
+                new Home().setArguments(bundle);
+                new Courses().setArguments(bundle);
+
+                startActivity(new Intent(this, MainActivity.class).putExtra("username", user.getUsername()));
+                finish();
+                break;
+            }
+        }
+
         signUp.setOnClickListener(v -> {
-            for (User user : users) {
-                String email = user.getUsername(), pin = user.getPassword(),
-                        username = String.valueOf(userName.getText()),
-                        password = String.valueOf(passWord.getText()),
-                        confirmPassword = String.valueOf(confirmPassWord.getText());
+            String username = String.valueOf(userName.getText()),
+                    password = String.valueOf(passWord.getText()),
+                    confirmPassword = String.valueOf(confirmPassWord.getText());
+            boolean hasSignedUp = new Link(this).hasSignedUp(username);
 
-                if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-                    Toast.makeText(SignupActivity.this, "No field should be empty!",
-                            Toast.LENGTH_SHORT).show();
-                    break;
-                } else if (!TextUtils.equals(password, confirmPassword)) {
-                    Toast.makeText(SignupActivity.this, "Password mismatch!", Toast.LENGTH_SHORT).show();
-                    break;
-                } else if (email.equalsIgnoreCase(username)) {
-                    Toast.makeText(SignupActivity.this, "You already have an account!\nSign in " +
-                            "instead...", Toast.LENGTH_SHORT).show();
-                    break;
-                } else {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("username", username);
-                    new Profile().setArguments(bundle);
-                    new Home().setArguments(bundle);
-                    new Courses().setArguments(bundle);
+            if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                Toast.makeText(SignupActivity.this, "No field should be empty!",
+                        Toast.LENGTH_SHORT).show();
+            } else if (!TextUtils.equals(password, confirmPassword)) {
+                Toast.makeText(SignupActivity.this, "Password mismatch!", Toast.LENGTH_SHORT).show();
+            } else if (hasSignedUp) {
+                Toast.makeText(SignupActivity.this, "You already have an account!\nSign in " +
+                        "instead...", Toast.LENGTH_SHORT).show();
+            } else {
+                database.insertUser(new User(0, username, password, getString(R.string.online)));
 
-                    startActivity(new Intent(SignupActivity.this, MainActivity.class));
-                    break;
-                }
+                Bundle bundle = new Bundle();
+                bundle.putString("username", username);
+                new Profile().setArguments(bundle);
+                new Home().setArguments(bundle);
+                new Courses().setArguments(bundle);
+
+                startActivity(new Intent(SignupActivity.this, MainActivity.class));
             }
         });
 

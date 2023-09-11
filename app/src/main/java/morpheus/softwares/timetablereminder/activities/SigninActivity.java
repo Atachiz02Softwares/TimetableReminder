@@ -38,18 +38,20 @@ public class SigninActivity extends AppCompatActivity {
 
         signIn.setOnClickListener(v -> {
             for (User user : users) {
-                String email = user.getUsername(), pin = user.getPassword(),
+                String dbUserName = user.getUsername(), pin = user.getPassword(),
                         username = String.valueOf(userName.getText()), password = String.valueOf(passWord.getText());
 
                 if (username.isEmpty() || password.isEmpty()) {
                     Toast.makeText(this, "No field should be empty!", Toast.LENGTH_SHORT).show();
                     break;
-                } else if (email.equals(username) && pin.equals(password)) {
+                } else if (dbUserName.equals(username) && pin.equals(password)) {
                     Bundle bundle = new Bundle();
                     bundle.putString("username", username);
                     new Profile().setArguments(bundle);
                     new Home().setArguments(bundle);
                     new Courses().setArguments(bundle);
+
+                    database.updateStatus(username, getString(R.string.online));
 
                     startActivity(new Intent(SigninActivity.this, MainActivity.class));
                     break;
