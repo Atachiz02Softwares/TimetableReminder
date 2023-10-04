@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Timetable Reminder</string>
     <string name="add">Add</string>
-    <string name="username">Username</string>
+    <string name="username">ID Number</string>
     <string name="password">Password</string>
     <string name="sign_in">Sign In</string>
     <string name="title">Atachiz02 Softwares</string>

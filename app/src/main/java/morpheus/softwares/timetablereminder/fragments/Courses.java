@@ -20,8 +20,6 @@ public class Courses extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.courses, container, false);
 
-//        Button button = view.findViewById(R.id.button);
-
         return view;
     }
 }

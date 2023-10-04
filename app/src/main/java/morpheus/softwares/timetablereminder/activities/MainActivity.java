@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         database = new Database(this);
 
-        String username = getIntent().getStringExtra("username");
+        String id = getIntent().getStringExtra("id");
 
         setSupportActionBar(toolbar);
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);   // Set the default selected item (optional)
@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                 builder.setIcon(R.drawable.round_logout_24)
                         .setMessage("Are you sure you want to sign out?")
                         .setPositiveButton("Sign Out", (dialog, which) -> {
-                            database.updateStatus(username, getString(R.string.offline));
+                            database.updateStatus(id, getString(R.string.offline));
                             finishAffinity();
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> alertDialog.dismiss()).show();

@@ -13,9 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 import morpheus.softwares.timetablereminder.R;
-import morpheus.softwares.timetablereminder.fragments.Courses;
-import morpheus.softwares.timetablereminder.fragments.Home;
-import morpheus.softwares.timetablereminder.fragments.Profile;
 import morpheus.softwares.timetablereminder.models.Database;
 import morpheus.softwares.timetablereminder.models.Link;
 import morpheus.softwares.timetablereminder.models.User;
@@ -44,13 +41,7 @@ public class SignupActivity extends AppCompatActivity {
 
         for (User user : users) {
             if (user.getStatus().equals(getString(R.string.online))) {
-                Bundle bundle = new Bundle();
-                bundle.putString("username", user.getUsername());
-                new Profile().setArguments(bundle);
-                new Home().setArguments(bundle);
-                new Courses().setArguments(bundle);
-
-                startActivity(new Intent(this, MainActivity.class).putExtra("username", user.getUsername()));
+                startActivity(new Intent(this, MainActivity.class).putExtra("id", user.getUsername()));
                 finish();
                 break;
             }
@@ -72,14 +63,8 @@ public class SignupActivity extends AppCompatActivity {
                         "instead...", Toast.LENGTH_SHORT).show();
             } else {
                 database.insertUser(new User(0, username, password, getString(R.string.online)));
-
-                Bundle bundle = new Bundle();
-                bundle.putString("username", username);
-                new Profile().setArguments(bundle);
-                new Home().setArguments(bundle);
-                new Courses().setArguments(bundle);
-
                 startActivity(new Intent(SignupActivity.this, MainActivity.class));
+                finish();
             }
         });
 

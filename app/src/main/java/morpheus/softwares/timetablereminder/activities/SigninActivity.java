@@ -45,14 +45,7 @@ public class SigninActivity extends AppCompatActivity {
                     Toast.makeText(this, "No field should be empty!", Toast.LENGTH_SHORT).show();
                     break;
                 } else if (dbUserName.equals(username) && pin.equals(password)) {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("username", username);
-                    new Profile().setArguments(bundle);
-                    new Home().setArguments(bundle);
-                    new Courses().setArguments(bundle);
-
                     database.updateStatus(username, getString(R.string.online));
-
                     startActivity(new Intent(SigninActivity.this, MainActivity.class));
                     break;
                 } else {
