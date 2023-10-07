@@ -6,10 +6,59 @@
     android:padding="10dp">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/title"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Home" />
+        android:layout_marginTop="50dp"
+        android:gravity="center"
+        android:text="Your Upcoming Class:"
+        android:textColor="@color/colorPrimary"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/courseCode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title"
+        android:layout_marginTop="60dp"
+        android:gravity="center"
+        android:text="CSC 502"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/courseTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/courseCode"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="Introduction to Artificial Intelligence"
+        android:textSize="24sp"
+        android:textStyle="bold|italic" />
+
+    <TextView
+        android:id="@+id/courseDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/courseTitle"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="07/10/2023"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/courseTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/courseDate"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="12:00 PM"
+        android:textSize="24sp"
+        android:textStyle="bold" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAddCourse"

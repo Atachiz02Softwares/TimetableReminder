@@ -61,7 +61,7 @@
             android:layout_marginTop="20dp"
             android:autofillHints=""
             android:hint="@string/department"
-            android:inputType="textPersonName"
+            android:inputType="text"
             android:textSize="20sp" />
 
         <EditText
@@ -71,7 +71,7 @@
             android:layout_marginTop="20dp"
             android:autofillHints="postalCode"
             android:hint="@string/level"
-            android:inputType="textPersonName"
+            android:inputType="number"
             android:textSize="20sp" />
 
         <Button
