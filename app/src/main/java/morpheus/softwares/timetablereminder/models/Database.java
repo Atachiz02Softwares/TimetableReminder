@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class Database extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "timetable.db",
-            TABLE_USERS = "users", TABLE_COURSES = "courses", TABLE_PROFILE = "profile";
+            TABLE_USERS = "users", TABLE_COURSES = "courses", TIME_TABLE = "timetable", TABLE_PROFILE = "profile";
     public static final int DATABASE_VERSION = 1;
 
     public Database(@Nullable Context context) {
@@ -26,6 +26,8 @@ public class Database extends SQLiteOpenHelper {
                 "password text, status text)");
         db.execSQL("CREATE TABLE courses (id integer PRIMARY KEY AUTOINCREMENT, course_code " +
                 "text, course_title text, date text, time text)");
+        db.execSQL("CREATE TABLE timetable (id integer PRIMARY KEY AUTOINCREMENT, course_code " +
+                "text, course_title text, date text, time text)");
         db.execSQL("CREATE TABLE profile (id integer PRIMARY KEY AUTOINCREMENT, username text, id_number text, " +
                 "email text, name text, level text, department text)");
     }
@@ -34,6 +36,7 @@ public class Database extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_COURSES);
+        db.execSQL("DROP TABLE IF EXISTS " + TIME_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROFILE);
         onCreate(db);
     }
@@ -52,6 +55,15 @@ public class Database extends SQLiteOpenHelper {
         String sqlInsert = "INSERT INTO " + TABLE_COURSES;
         sqlInsert += " values( null, '" + course.getCourseCode() + "', '" + course.getCourseTitle() +
                 "', '" + course.getDate() + "', '" + course.getTime() + "' )";
+        db.execSQL(sqlInsert);
+        db.close();
+    }
+
+    public void insertTimeTable(TimeTable timeTable) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String sqlInsert = "INSERT INTO " + TIME_TABLE;
+        sqlInsert += " values( null, '" + timeTable.getCourseCode() + "', '" + timeTable.getCourseTitle() +
+                "', '" + timeTable.getDate() + "', '" + timeTable.getTime() + "' )";
         db.execSQL(sqlInsert);
         db.close();
     }
@@ -103,6 +115,53 @@ public class Database extends SQLiteOpenHelper {
         return courses;
     }
 
+    public Course getLastCourse() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Course lastCourse = null;
+
+        String sqlQuery = "SELECT * FROM " + TABLE_COURSES + " ORDER BY id DESC LIMIT 1";
+        Cursor cursor = db.rawQuery(sqlQuery, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            int idIndex = cursor.getColumnIndex("id");
+            int courseCodeIndex = cursor.getColumnIndex("course_code");
+            int courseTitleIndex = cursor.getColumnIndex("course_title");
+            int dateIndex = cursor.getColumnIndex("date");
+            int timeIndex = cursor.getColumnIndex("time");
+
+            lastCourse = new Course(
+                    cursor.getInt(idIndex),
+                    cursor.getString(courseCodeIndex),
+                    cursor.getString(courseTitleIndex),
+                    cursor.getString(dateIndex),
+                    cursor.getString(timeIndex)
+            );
+            cursor.close();
+        }
+
+        db.close();
+        return lastCourse;
+    }
+
+    public ArrayList<TimeTable> selectAllTimeTables() {
+        String sqlQuery = "SELECT * FROM " + TIME_TABLE;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        @SuppressLint("Recycle")
+        Cursor cursor = db.rawQuery(sqlQuery, null);
+
+        ArrayList<TimeTable> timeTables = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            TimeTable currentTimeTable = new TimeTable(cursor.getInt(0),
+                    cursor.getString(1), cursor.getString(2),
+                    cursor.getString(3), cursor.getString(4));
+            timeTables.add(currentTimeTable);
+        }
+
+        db.close();
+        return timeTables;
+    }
+
     public ArrayList<UserProfile> selectAllUserProfiles() {
         String sqlQuery = "SELECT * FROM " + TABLE_PROFILE;
 
@@ -134,6 +193,12 @@ public class Database extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void deleteTimeTable(String courseCode) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TIME_TABLE, "course_code=?", new String[]{courseCode});
+        db.close();
+    }
+
     public void deleteUserProfile(String username) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_PROFILE, "course_code=?", new String[]{username});
@@ -146,6 +211,15 @@ public class Database extends SQLiteOpenHelper {
         values.put("date", newDate);
         values.put("time", newTime);
         db.update(TABLE_COURSES, values, "course_code=?", new String[]{courseCode});
+        db.close();
+    }
+
+    public void updateTimeTable(String courseCode, String newDate, String newTime) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("date", newDate);
+        values.put("time", newTime);
+        db.update(TIME_TABLE, values, "course_code=?", new String[]{courseCode});
         db.close();
     }
 

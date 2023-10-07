@@ -23,7 +23,6 @@
         android:layout_below="@+id/title"
         android:layout_marginTop="60dp"
         android:gravity="center"
-        android:text="CSC 502"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -34,7 +33,6 @@
         android:layout_below="@+id/courseCode"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Introduction to Artificial Intelligence"
         android:textSize="24sp"
         android:textStyle="bold|italic" />
 
@@ -45,7 +43,6 @@
         android:layout_below="@+id/courseTitle"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="07/10/2023"
         android:textSize="24sp"
         android:textStyle="bold" />
 
@@ -56,7 +53,6 @@
         android:layout_below="@+id/courseDate"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="12:00 PM"
         android:textSize="24sp"
         android:textStyle="bold" />
 
