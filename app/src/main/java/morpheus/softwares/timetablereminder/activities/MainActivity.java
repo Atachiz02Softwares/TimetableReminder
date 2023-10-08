@@ -1,9 +1,14 @@
 package morpheus.softwares.timetablereminder.activities;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Button;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.appbar.MaterialToolbar;
@@ -34,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         database = new Database(this);
 
-        String id = getIntent().getStringExtra("id");
-
         setSupportActionBar(toolbar);
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);   // Set the default selected item (optional)
 
@@ -51,27 +54,33 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
 
-        // TODO
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.toolbar) {
-                builder = new MaterialAlertDialogBuilder(MainActivity.this, R.style.MaterialAlertDialogRounded);
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.toolbar_menu, menu);
+        MenuItem menuItem = menu.findItem(R.id.signout);
+        final Button signOut = (Button) MenuItemCompat.getActionView(menuItem);
 
-                builder.setIcon(R.drawable.round_logout_24)
-                        .setMessage("Are you sure you want to sign out?")
-                        .setPositiveButton("Sign Out", (dialog, which) -> {
-                            database.updateStatus(id, getString(R.string.offline));
-                            finishAffinity();
-                        })
-                        .setNegativeButton("Cancel", (dialog, which) -> alertDialog.dismiss()).show();
+        signOut.setOnClickListener(v -> {
+            String id = getIntent().getStringExtra("id");
+            builder = new MaterialAlertDialogBuilder(MainActivity.this, R.style.MaterialAlertDialogRounded);
 
-                alertDialog = builder.create();
-                alertDialog.setCanceledOnTouchOutside(false);
-                alertDialog.show();
-            }
+            builder.setIcon(R.drawable.round_logout_24)
+                    .setMessage("Are you sure you want to sign out?")
+                    .setPositiveButton("Sign Out", (dialog, which) -> {
+                        database.updateStatus(id, getString(R.string.offline));
+                        finishAffinity();
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> alertDialog.dismiss()).show();
 
-            return false;
+            alertDialog = builder.create();
+            alertDialog.setCanceledOnTouchOutside(false);
+            alertDialog.show();
         });
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     private void setFragment(Fragment fragment) {
