@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import morpheus.softwares.timetablereminder.R;
 import morpheus.softwares.timetablereminder.adapters.CourseAdapter;
@@ -35,6 +36,8 @@ public class Courses extends Fragment {
         database = new Database(getContext());
 
         courses = database.selectAllCourses();
+        Collections.reverse(courses);   // Reverses the order of the elements in the specified list
+
         recyclerView = view.findViewById(R.id.coursesRecycler);
         courseAdapter = new CourseAdapter(getContext(), courses);
         recyclerView.setHasFixedSize(true);

@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +14,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,14 +27,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 
 import morpheus.softwares.timetablereminder.R;
-import morpheus.softwares.timetablereminder.models.AlarmReceiver;
 import morpheus.softwares.timetablereminder.models.Course;
 import morpheus.softwares.timetablereminder.models.Database;
+import morpheus.softwares.timetablereminder.models.NotificationReceiver;
 import morpheus.softwares.timetablereminder.models.TimeTable;
 
 public class Home extends Fragment {
@@ -44,7 +42,6 @@ public class Home extends Fragment {
     AlertDialog alertDialog;
     MaterialAlertDialogBuilder builder;
     Calendar calendar;
-    private int uniqueAlarmID = 0; // Used to assign unique IDs to alarms
 
     public Home() {
     }
@@ -62,20 +59,17 @@ public class Home extends Fragment {
                 course_date = view.findViewById(R.id.courseDate),
                 course_time = view.findViewById(R.id.courseTime);
 
-//        TimeTable nextScheduledCourse = getNextScheduledCourse();
-//        if (nextScheduledCourse != null) {
-//            course_code.setText(nextScheduledCourse.getCourseCode());
-//            course_title.setText(nextScheduledCourse.getCourseTitle());
-//            course_date.setText(nextScheduledCourse.getDate());
-//            course_time.setText(nextScheduledCourse.getTime());
-//        }
-
-        Course lastCourse = database.getLastCourse();
-        if (lastCourse != null) {
-            course_code.setText(lastCourse.getCourseCode());
-            course_title.setText(lastCourse.getCourseTitle());
-            course_date.setText(lastCourse.getDate());
-            course_time.setText(lastCourse.getTime());
+        TimeTable nextScheduledCourse = getNextScheduledCourse();
+        if (nextScheduledCourse != null) {
+            course_code.setText(nextScheduledCourse.getCourseCode());
+            course_title.setText(nextScheduledCourse.getCourseTitle());
+            course_date.setText(nextScheduledCourse.getDate());
+            course_time.setText(nextScheduledCourse.getTime());
+        } else {
+            course_code.setText("Yay! No upcoming class...");
+            course_title.setText("");
+            course_date.setText("");
+            course_time.setText("");
         }
 
         FloatingActionButton floatingActionButton = view.findViewById(R.id.fabAddCourse);
@@ -122,7 +116,7 @@ public class Home extends Fragment {
 
                 TimeTable timeTable = new TimeTable(0, courseCode, courseTitle, date[0], time[0]);
                 database.insertTimeTable(timeTable);
-                setAlarm(timeTable);    // Set an alarm for the course
+                scheduleNotification(timeTable);    // Set a notification for the course
 
                 alertDialog.dismiss();
             });
@@ -161,35 +155,36 @@ public class Home extends Fragment {
         return months[month - 1];
     }
 
-    private void setAlarm(TimeTable timeTable) {
+    private void scheduleNotification(TimeTable timeTable) {
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd, hh:mm", Locale.US);
-            Date courseDateTime = dateFormat.parse(timeTable.getDate() + ", " + timeTable.getTime());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
+            Date courseDateTime = dateFormat.parse(timeTable.getDate() + " " + timeTable.getTime());
 
-            // Create a Calendar instance for the alarm time
-            Calendar alarmCalendar = Calendar.getInstance();
+            // Calculate the time difference between the course time and current time
             assert courseDateTime != null;
-            alarmCalendar.setTime(courseDateTime);
+            long timeDifference = courseDateTime.getTime() - System.currentTimeMillis();
 
-            // Create an Intent for the alarm
-            Intent alarmIntent = new Intent(requireContext(), AlarmReceiver.class);
-            alarmIntent.putExtra("course_title", timeTable.getCourseTitle()); // Pass course title to BroadcastReceiver
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), uniqueAlarmID++,
-                    alarmIntent, PendingIntent.FLAG_IMMUTABLE);
+            if (timeDifference <= 0) {
+                // The course time has already passed; do not schedule the notification
+                return;
+            }
 
-            // Get the AlarmManager and set the alarm using ELAPSED_REALTIME_WAKEUP
+            // Create an Intent for the notification
+            Intent notificationIntent = new Intent(requireContext(), NotificationReceiver.class);
+            notificationIntent.putExtra("course_title", timeTable.getCourseTitle());
+
+            // Use FLAG_IMMUTABLE to ensure compatibility with Android S+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0,
+                    notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+
+            // Get the AlarmManager and schedule the notification
             AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
 
             if (alarmManager != null) {
-                long elapsedTime = alarmCalendar.getTimeInMillis() - System.currentTimeMillis();
-                alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        SystemClock.elapsedRealtime() + elapsedTime, pendingIntent);
+                // Schedule the notification at the specified time
+                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeDifference, pendingIntent);
             }
-        } catch (SecurityException se) {
-            // Handle the SecurityException here (e.g., show a message to the user)
-            Toast.makeText(getContext(), se.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-            se.printStackTrace();
-        } catch (Exception e) {
+        } catch (ParseException | SecurityException e) {
             e.printStackTrace();
         }
     }
@@ -206,14 +201,12 @@ public class Home extends Fragment {
         // Create a list to store upcoming courses
         ArrayList<TimeTable> upcomingCourses = new ArrayList<>();
 
-        // Define a date format to parse course dates from the database
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd, hh:mm", Locale.US);
-
         // Iterate through the courses and filter upcoming ones
         for (TimeTable timeTable : timeTables) {
             try {
                 // Parse the date and time of the course
-                Date courseDateTime = dateFormat.parse(timeTable.getDate() + ", " + timeTable.getTime());
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
+                Date courseDateTime = dateFormat.parse(timeTable.getDate() + " " + timeTable.getTime());
 
                 // Compare with the current date and time
                 assert courseDateTime != null;
@@ -225,23 +218,23 @@ public class Home extends Fragment {
             }
         }
 
-        // Find the course with the earliest upcoming date and time
-        TimeTable nextCourse = null;
-        Date nextCourseDateTime = null;
-
-        for (TimeTable timeTable : upcomingCourses) {
+        // Sort the upcoming courses by date and time
+        upcomingCourses.sort(Comparator.comparing(o -> {
             try {
-                Date courseDateTime = dateFormat.parse(timeTable.getDate() + ", " + timeTable.getTime());
-
-                if (nextCourse == null || Objects.requireNonNull(courseDateTime).before(nextCourseDateTime)) {
-                    nextCourse = timeTable;
-                    nextCourseDateTime = courseDateTime;
-                }
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
+                return dateFormat.parse(o.getDate() + " " + o.getTime());
             } catch (ParseException e) {
                 e.printStackTrace();
+                return null;
             }
+        }));
+
+        // Get the first course in the sorted list, which is the next course
+        if (!upcomingCourses.isEmpty()) {
+            return upcomingCourses.get(0);
         }
 
-        return nextCourse;
+        // If there are no upcoming courses, return null
+        return null;
     }
 }
