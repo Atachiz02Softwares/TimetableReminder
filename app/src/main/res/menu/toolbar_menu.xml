@@ -6,5 +6,5 @@
         android:icon="@drawable/round_logout_24"
         android:title="Sign Out"
         app:showAsAction="ifRoom|withText"
-        app:actionViewClass="android.widget.Button" />
+        app:actionViewClass="android.widget.ImageButton" />
 </menu>

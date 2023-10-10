@@ -5,6 +5,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +17,8 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+
+import org.w3c.dom.Text;
 
 import morpheus.softwares.timetablereminder.R;
 import morpheus.softwares.timetablereminder.fragments.Courses;
@@ -61,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.toolbar_menu, menu);
         MenuItem menuItem = menu.findItem(R.id.signout);
-        final Button signOut = (Button) MenuItemCompat.getActionView(menuItem);
+        final ImageButton signOut = (ImageButton) MenuItemCompat.getActionView(menuItem);
 
         signOut.setOnClickListener(v -> {
             String id = getIntent().getStringExtra("id");

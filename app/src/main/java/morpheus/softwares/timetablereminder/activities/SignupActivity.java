@@ -1,6 +1,10 @@
 package morpheus.softwares.timetablereminder.activities;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Button;
@@ -8,7 +12,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
 
@@ -25,6 +31,7 @@ public class SignupActivity extends AppCompatActivity {
     ArrayList<User> users;
     Database database;
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +45,14 @@ public class SignupActivity extends AppCompatActivity {
 
         database = new Database(this);
         users = database.selectAllUsers();
+
+        // Ask user to grant permissions
+        if ((ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED) || (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.VIBRATE}, 100);
+        }
 
         for (User user : users) {
             if (user.getStatus().equals(getString(R.string.online))) {
