@@ -4,10 +4,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,8 +14,6 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
-import org.w3c.dom.Text;
 
 import morpheus.softwares.timetablereminder.R;
 import morpheus.softwares.timetablereminder.fragments.Courses;
@@ -43,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         database = new Database(this);
+
+        setFragment(new Home());
 
         setSupportActionBar(toolbar);
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);   // Set the default selected item (optional)

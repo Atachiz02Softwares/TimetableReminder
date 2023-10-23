@@ -20,4 +20,5 @@
     <string name="add_profile">Add Profile</string>
     <string name="online">online</string>
     <string name="offline">offline</string>
+    <string name="yay">Yay! No upcoming class...</string>
 </resources>

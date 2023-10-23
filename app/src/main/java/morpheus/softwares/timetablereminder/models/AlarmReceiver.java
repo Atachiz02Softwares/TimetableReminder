@@ -35,7 +35,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle("Class Reminder")
+                .setContentTitle(courseCode)
                 .setContentText(courseCode + " is starting soon!")
                 .setSmallIcon(R.mipmap.ic_launcher_foreground) // Replace with your app's icon
                 .setContentIntent(pendingIntent)

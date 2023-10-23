@@ -80,7 +80,7 @@ public class Home extends Fragment {
             course_date.setText(nextScheduledCourse.getDate());
             course_time.setText(nextScheduledCourse.getTime());
         } else {
-            course_code.setText("Yay! No upcoming class...");
+            course_code.setText(R.string.yay);
             course_title.setText("");
             course_date.setText("");
             course_time.setText("");
