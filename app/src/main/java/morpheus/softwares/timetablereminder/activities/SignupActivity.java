@@ -1,7 +1,6 @@
 package morpheus.softwares.timetablereminder.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -49,9 +48,9 @@ public class SignupActivity extends AppCompatActivity {
         // Ask user to grant permissions
         if ((ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
                 PackageManager.PERMISSION_GRANTED) || (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED)) {
-            ActivityCompat.requestPermissions((Activity) this, new String[]{Manifest.permission.POST_NOTIFICATIONS,
-                    Manifest.permission.VIBRATE}, 100);
+                Manifest.permission.SET_ALARM) != PackageManager.PERMISSION_GRANTED)) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.SET_ALARM}, 10);
         }
 
         for (User user : users) {

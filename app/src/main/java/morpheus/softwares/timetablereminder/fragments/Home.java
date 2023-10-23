@@ -1,10 +1,17 @@
 package morpheus.softwares.timetablereminder.fragments;
 
+import static android.content.Context.ALARM_SERVICE;
+import static android.content.Context.NOTIFICATION_SERVICE;
+import static morpheus.softwares.timetablereminder.models.AlarmReceiver.CHANNEL_ID;
+
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +21,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,9 +40,10 @@ import java.util.Date;
 import java.util.Locale;
 
 import morpheus.softwares.timetablereminder.R;
+import morpheus.softwares.timetablereminder.activities.MainActivity;
+import morpheus.softwares.timetablereminder.models.AlarmReceiver;
 import morpheus.softwares.timetablereminder.models.Course;
 import morpheus.softwares.timetablereminder.models.Database;
-import morpheus.softwares.timetablereminder.models.NotificationReceiver;
 import morpheus.softwares.timetablereminder.models.TimeTable;
 
 public class Home extends Fragment {
@@ -42,6 +51,9 @@ public class Home extends Fragment {
     AlertDialog alertDialog;
     MaterialAlertDialogBuilder builder;
     Calendar calendar;
+
+    AlarmManager alarmManager;
+    PendingIntent pendingIntent;
 
     public Home() {
     }
@@ -53,6 +65,8 @@ public class Home extends Fragment {
 
         database = new Database(getContext());
         calendar = Calendar.getInstance();
+
+        createNotificationChannel();
 
         TextView course_code = view.findViewById(R.id.courseCode),
                 course_title = view.findViewById(R.id.courseTitle),
@@ -116,7 +130,8 @@ public class Home extends Fragment {
 
                 TimeTable timeTable = new TimeTable(0, courseCode, courseTitle, date[0], time[0]);
                 database.insertTimeTable(timeTable);
-                scheduleNotification(timeTable);    // Set a notification for the course
+
+                setAlarm(datePicker, timePicker, courseCode);
 
                 alertDialog.dismiss();
             });
@@ -153,40 +168,6 @@ public class Home extends Fragment {
                 "August", "September", "October", "November", "December"
         };
         return months[month - 1];
-    }
-
-    private void scheduleNotification(TimeTable timeTable) {
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
-            Date courseDateTime = dateFormat.parse(timeTable.getDate() + " " + timeTable.getTime());
-
-            // Calculate the time difference between the course time and current time
-            assert courseDateTime != null;
-            long timeDifference = courseDateTime.getTime() - System.currentTimeMillis();
-
-            if (timeDifference <= 0) {
-                // The course time has already passed; do not schedule the notification
-                return;
-            }
-
-            // Create an Intent for the notification
-            Intent notificationIntent = new Intent(requireContext(), NotificationReceiver.class);
-            notificationIntent.putExtra("course_title", timeTable.getCourseTitle());
-
-            // Use FLAG_IMMUTABLE to ensure compatibility with Android S+
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0,
-                    notificationIntent, PendingIntent.FLAG_IMMUTABLE);
-
-            // Get the AlarmManager and schedule the notification
-            AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
-
-            if (alarmManager != null) {
-                // Schedule the notification at the specified time
-                alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + timeDifference, pendingIntent);
-            }
-        } catch (ParseException | SecurityException e) {
-            e.printStackTrace();
-        }
     }
 
     // Method to get the next scheduled course
@@ -236,5 +217,60 @@ public class Home extends Fragment {
 
         // If there are no upcoming courses, return null
         return null;
+    }
+
+    private void setAlarm(DatePicker datePicker, TimePicker timePicker, String courseCode) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, datePicker.getYear());
+        calendar.set(Calendar.MONTH, datePicker.getMonth());
+        calendar.set(Calendar.DAY_OF_WEEK, datePicker.getDayOfMonth());
+        calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
+        calendar.set(Calendar.MINUTE, timePicker.getMinute());
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        alarmManager = (AlarmManager) requireContext().getSystemService(ALARM_SERVICE);
+        Intent alarmIntent = new Intent(requireContext(), AlarmReceiver.class);
+        alarmIntent.putExtra("courseCode", courseCode);
+
+        pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY, pendingIntent);
+        Toast.makeText(requireContext(), "Class time is set.", Toast.LENGTH_SHORT).show();
+
+        // Create a notification to inform the user
+        createNotification(courseCode);
+    }
+
+    private void createNotification(String courseCode) {
+        Intent notificationIntent = new Intent(requireContext(), MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(requireContext(), 0,
+                notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        // Build the notification
+        Notification notification = new Notification.Builder(requireContext())
+                .setContentTitle("Class Reminder")
+                .setContentText(courseCode + " is starting soon!")
+                .setSmallIcon(R.mipmap.ic_launcher_foreground) // Replace with your app's icon
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true) // Close the notification when the user taps it
+                .build();
+
+        NotificationManager notificationManager = (NotificationManager)
+                requireContext().getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(0, notification);
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "classChannel";
+            String description = "Class Channel for Alarm Manager";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+            notificationChannel.setDescription(description);
+
+            NotificationManager notificationManager = requireContext().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
     }
 }
