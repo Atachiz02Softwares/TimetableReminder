@@ -286,10 +286,6 @@ public class Home extends Fragment {
 
             NotificationManager notificationManager = requireContext().getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(notificationChannel);
-
-//            SharedPreferences sh = getSharedPreferences("WordOfTheDay", Context.MODE_PRIVATE);
-//            String wtd = sh.getString("word", wordOfDay);
-//            scheduleDailyNotification(wtd);
         }
     }
 }
