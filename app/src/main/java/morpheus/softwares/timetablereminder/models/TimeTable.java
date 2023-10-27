@@ -2,14 +2,14 @@ package morpheus.softwares.timetablereminder.models;
 
 public class TimeTable {
     private int id;
-    private String courseCode, courseTitle, date, time;
+    private String courseCode, courseTitle;
+    private long timeInMillis;
 
-    public TimeTable(int id, String courseCode, String courseTitle, String date, String time) {
+    public TimeTable(int id, String courseCode, String courseTitle, long timeInMillis) {
         setId(id);
         setCourseCode(courseCode);
         setCourseTitle(courseTitle);
-        setDate(date);
-        setTime(time);
+        setTimeInMillis(timeInMillis);
     }
 
     public int getId() {
@@ -36,19 +36,11 @@ public class TimeTable {
         this.courseTitle = courseTitle;
     }
 
-    public String getDate() {
-        return date;
+    public long getTimeInMillis() {
+        return timeInMillis;
     }
 
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
+    public void setTimeInMillis(long timeInMillis) {
+        this.timeInMillis = timeInMillis;
     }
 }

@@ -1,6 +1,5 @@
 package morpheus.softwares.timetablereminder.fragments;
 
-import static android.content.Context.ALARM_SERVICE;
 import static android.content.Context.NOTIFICATION_SERVICE;
 import static morpheus.softwares.timetablereminder.models.AlarmReceiver.CHANNEL_ID;
 
@@ -10,6 +9,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,7 +21,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,9 +51,6 @@ public class Home extends Fragment {
     MaterialAlertDialogBuilder builder;
     Calendar calendar;
 
-    AlarmManager alarmManager;
-    PendingIntent pendingIntent;
-
     public Home() {
     }
 
@@ -73,7 +69,7 @@ public class Home extends Fragment {
                 course_date = view.findViewById(R.id.courseDate),
                 course_time = view.findViewById(R.id.courseTime);
 
-        TimeTable nextScheduledCourse = getNextScheduledCourse();
+        Course nextScheduledCourse = getNextScheduledCourse();
         if (nextScheduledCourse != null) {
             course_code.setText(nextScheduledCourse.getCourseCode());
             course_title.setText(nextScheduledCourse.getCourseTitle());
@@ -114,8 +110,8 @@ public class Home extends Fragment {
                 int year = Integer.parseInt(dateParts[0]);
                 int month = Integer.parseInt(dateParts[1]);
                 int day = Integer.parseInt(dateParts[2]);
-                @SuppressLint("DefaultLocale") String formattedDate =
-                        String.format("%d%s %s, %d", day, getDayOfMonthSuffix(day), getMonthName(month), year);
+                @SuppressLint("DefaultLocale")
+                String formattedDate = String.format("%d%s %s, %d", day, getDayOfMonthSuffix(day), getMonthName(month), year);
 
                 // Format the time including AM/PM
                 String[] timeParts = time[0].split(":");
@@ -127,11 +123,22 @@ public class Home extends Fragment {
 
                 // Insert the course into the database
                 database.insertCourse(new Course(0, courseCode, courseTitle, formattedDate, formattedTime));
+//                database.insertCourse(new Course(0, courseCode, courseTitle, date[0], time[0]));
 
-                TimeTable timeTable = new TimeTable(0, courseCode, courseTitle, date[0], time[0]);
+                // Create a calendar instance and set it to the selected date and time
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth(),
+                        timePicker.getHour(), timePicker.getMinute(), 0);
+
+                long alarmTime = calendar.getTimeInMillis();
+
+                TimeTable timeTable = new TimeTable(0, courseCode, courseTitle, alarmTime);
                 database.insertTimeTable(timeTable);
 
-                setAlarm(datePicker, timePicker, courseCode);
+                // Set up the alarm using AlarmManager
+                setAlarm(alarmTime, courseCode);
+
+//                setAlarm(datePicker, timePicker, courseCode);
 
                 alertDialog.dismiss();
             });
@@ -171,28 +178,29 @@ public class Home extends Fragment {
     }
 
     // Method to get the next scheduled course
-    private TimeTable getNextScheduledCourse() {
+    private Course getNextScheduledCourse() {
         // Get the current date and time
         Calendar currentCalendar = Calendar.getInstance();
         Date currentDate = currentCalendar.getTime();
 
         // Fetch all scheduled courses from the database
-        ArrayList<TimeTable> timeTables = database.selectAllTimeTables();
+        ArrayList<Course> courses = database.selectAllCourses();
 
         // Create a list to store upcoming courses
-        ArrayList<TimeTable> upcomingCourses = new ArrayList<>();
+        ArrayList<Course> upcomingCourses = new ArrayList<>();
 
         // Iterate through the courses and filter upcoming ones
-        for (TimeTable timeTable : timeTables) {
+        for (Course course : courses) {
             try {
                 // Parse the date and time of the course
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
-                Date courseDateTime = dateFormat.parse(timeTable.getDate() + " " + timeTable.getTime());
+//                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("d MMMM, yyyy hh:mm a", Locale.US);
+                Date courseDateTime = dateFormat.parse(course.getDate() + " " + course.getTime());
 
                 // Compare with the current date and time
                 assert courseDateTime != null;
                 if (courseDateTime.after(currentDate)) {
-                    upcomingCourses.add(timeTable);
+                    upcomingCourses.add(course);
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -219,24 +227,28 @@ public class Home extends Fragment {
         return null;
     }
 
-    private void setAlarm(DatePicker datePicker, TimePicker timePicker, String courseCode) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, datePicker.getYear());
-        calendar.set(Calendar.MONTH, datePicker.getMonth());
-        calendar.set(Calendar.DAY_OF_WEEK, datePicker.getDayOfMonth());
-        calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
-        calendar.set(Calendar.MINUTE, timePicker.getMinute());
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        alarmManager = (AlarmManager) requireContext().getSystemService(ALARM_SERVICE);
+    @SuppressLint("ScheduleExactAlarm")
+    private void setAlarm(long alarmTime, String courseCode) {
+        AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
         Intent alarmIntent = new Intent(requireContext(), AlarmReceiver.class);
         alarmIntent.putExtra("courseCode", courseCode);
 
-        pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE);
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, pendingIntent);
-        Toast.makeText(requireContext(), "Class time is set.", Toast.LENGTH_SHORT).show();
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, alarmIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // Set the initial alarm
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
+
+        // Calculate the time for the next occurrence (e.g., a week later)
+        Calendar nextAlarmCalendar = Calendar.getInstance();
+        nextAlarmCalendar.setTimeInMillis(alarmTime);
+        nextAlarmCalendar.add(Calendar.DAY_OF_WEEK, 7); // Add one week
+
+        long nextAlarmTime = nextAlarmCalendar.getTimeInMillis();
+
+        // Schedule the next alarm
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, nextAlarmTime,
+                AlarmManager.INTERVAL_DAY * 7, pendingIntent);
 
         // Create a notification to inform the user
         createNotification(courseCode);
@@ -245,7 +257,7 @@ public class Home extends Fragment {
     private void createNotification(String courseCode) {
         Intent notificationIntent = new Intent(requireContext(), MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(requireContext(), 0,
-                notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+                notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         // Build the notification
         Notification notification = new Notification.Builder(requireContext())
@@ -263,14 +275,21 @@ public class Home extends Fragment {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "classChannel";
+            CharSequence name = "ClassChannel";
             String description = "Class Channel for Alarm Manager";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, name, importance);
             notificationChannel.setDescription(description);
+            notificationChannel.enableVibration(true);
+//            notificationChannel.setVibrationPattern(new long[] {1000,500,1000,500,1000,500});
+            notificationChannel.setBypassDnd(true);
 
             NotificationManager notificationManager = requireContext().getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(notificationChannel);
+
+//            SharedPreferences sh = getSharedPreferences("WordOfTheDay", Context.MODE_PRIVATE);
+//            String wtd = sh.getString("word", wordOfDay);
+//            scheduleDailyNotification(wtd);
         }
     }
 }

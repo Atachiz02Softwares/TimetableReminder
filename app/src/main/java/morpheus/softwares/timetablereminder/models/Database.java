@@ -27,7 +27,7 @@ public class Database extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE courses (id integer PRIMARY KEY AUTOINCREMENT, course_code " +
                 "text, course_title text, date text, time text)");
         db.execSQL("CREATE TABLE timetable (id integer PRIMARY KEY AUTOINCREMENT, course_code " +
-                "text, course_title text, date text, time text)");
+                "text, course_title text, time integer)");
         db.execSQL("CREATE TABLE profile (id integer PRIMARY KEY AUTOINCREMENT, username text, id_number text, " +
                 "email text, name text, level text, department text)");
     }
@@ -63,7 +63,7 @@ public class Database extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String sqlInsert = "INSERT INTO " + TIME_TABLE;
         sqlInsert += " values( null, '" + timeTable.getCourseCode() + "', '" + timeTable.getCourseTitle() +
-                "', '" + timeTable.getDate() + "', '" + timeTable.getTime() + "' )";
+                "', '" + timeTable.getTimeInMillis() + "' )";
         db.execSQL(sqlInsert);
         db.close();
     }
@@ -152,9 +152,8 @@ public class Database extends SQLiteOpenHelper {
 
         ArrayList<TimeTable> timeTables = new ArrayList<>();
         while (cursor.moveToNext()) {
-            TimeTable currentTimeTable = new TimeTable(cursor.getInt(0),
-                    cursor.getString(1), cursor.getString(2),
-                    cursor.getString(3), cursor.getString(4));
+            TimeTable currentTimeTable = new TimeTable(cursor.getInt(0), cursor.getString(1),
+                    cursor.getString(2), cursor.getLong(3));
             timeTables.add(currentTimeTable);
         }
 
